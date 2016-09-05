@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "922215586187",
+    "project_id": "firebase-socialfeed"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:922215586187:android:cd40babda6d1c9a8",
+        "android_client_info": {
+          "package_name": "com.internship.socialfeed"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "922215586187-1op9k737atcfc1ru191gc9maum1eohea.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.internship.socialfeed",
+            "certificate_hash": "6B0FC2FFD0257E7A843385F8732DE3EA6F8E7E63"
+          }
+        },
+        {
+          "client_id": "922215586187-tej5fhvov1gf75230vta0kd6omtslrbq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOhuvQ5uCFxAduMf2QBXYAoy6nnS41tQU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

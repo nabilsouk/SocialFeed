@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/shape_square_white"/>
+    <item android:drawable="@drawable/ic_fb_blue"
+        android:height="20dp"
+        android:width="24dp"
+        android:bottom="2dp"
+        android:top="2dp" />
+</layer-list>
