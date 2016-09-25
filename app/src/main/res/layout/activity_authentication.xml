@@ -5,7 +5,7 @@
     android:id="@+id/activity_authentication"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.nader.project.AuthenticationActivity">
+    tools:context="com.internship.socialfeed.authentication.AuthenticationActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -15,11 +15,11 @@
         app:layout_scrollFlags="scroll|enterAlways"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-    <fragment
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/optionLoginFragment"
-        android:name="com.internship.socialfeed.LoginOptionsFragment"/>
+        android:id="@+id/flContainer"
+        android:name="com.internship.socialfeed.authentication.LoginOptionsFragment"/>
 
 
 </RelativeLayout>

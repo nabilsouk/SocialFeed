@@ -1,11 +1,12 @@
 package com.internship.socialfeed.data;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -16,52 +17,85 @@ import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
-import com.internship.socialfeed.SessionManager;
-import com.internship.socialfeed.User;
+import com.google.android.gms.common.api.Status;
+import com.internship.socialfeed.Configuration.Configuration;
+import com.internship.socialfeed.components.Provider;
+import com.internship.socialfeed.components.User;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
 
+import static com.google.android.gms.analytics.internal.zzy.e;
+import static com.internship.socialfeed.components.Provider.EMAIL_LOGIN;
+
 /**
  * Provides user login via different ways(Facebook Login, Google Login, Email Login)
  */
-
 public class LoginProvider implements FacebookCallback<LoginResult>,
         GoogleApiClient.OnConnectionFailedListener {
     private Context context;
     // fb
     private CallbackManager callbackManager;
     private OnLoginProviderListener loginListener;
-    private LoginResult loginResult;
     // google
     private static final int RC_GOOGLE_LOGIN = 9001;
-    private GoogleApiClient mGoogleApiClient;
+    private static GoogleApiClient mGoogleApiClient;
     private GoogleSignInResult result;
 
     public LoginProvider(Context context, OnLoginProviderListener loginRequested) {
         this.loginListener = loginRequested;
         this.context = context;
+        FacebookSdk.sdkInitialize(context);
     }
 
     /**
      * Handles activity results in case of social login.
      */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.i(Configuration.TAG,"login provider "+requestCode+"    "+resultCode);
         if (requestCode == RC_GOOGLE_LOGIN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            mGoogleApiClient.connect();
+            handleGoogleLoginResult(data);
         }
         else {
-            Log.i("activity result","result");
+            Log.i(Configuration.TAG,"result");
             if(callbackManager != null)  callbackManager.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    /**
+     * Handles the data received by google login activity result.
+     * @param data
+     */
+    private void handleGoogleLoginResult(Intent data) {
+        if (data != null) {
+            result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if (result != null) {
+                try {
+                    GoogleSignInAccount account = result.getSignInAccount();
+                    if (account!=null) {
+                        User user = new User(result.getSignInAccount().getDisplayName(), result.getSignInAccount().getEmail(), "");
+                        user.setId(result.getSignInAccount().getId());
+                        user.setProvider(Provider.GOOGLE_LOGIN);
+                        Log.i(Configuration.TAG, "Google login success");
+                        SessionManager.getInstance().storeSession(user);
+                        loginListener.onLoginSuccess(user);
+                    }
+                    } catch (Exception e) {
+                        // Do Nothing
+                }
+            }
+            //logout
+            if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+                Auth.GoogleSignInApi.signOut(mGoogleApiClient);
+            }
         }
     }
 
@@ -69,32 +103,24 @@ public class LoginProvider implements FacebookCallback<LoginResult>,
 
     /**
      * Requests to login the user using the Facebook SDK.
-     * The result will be handled in the callbackmanager.
-     *
-     * Requests facebook login of user and waits for
-     * the sends a callbackManager listener to receive callbacks.
-     *
+     * The result will be handled in the callbackManager.
      */
-    public void loginViaFB(Fragment fragment){
-        FacebookSdk.sdkInitialize(context);
-        LoginManager.getInstance().logOut();
+    public void loginViaFB(Activity activity){
         // checks if an accessToken already exists
         if(AccessToken.getCurrentAccessToken() != null ){
             Log.i("logged","Logged in");
         }
         callbackManager = CallbackManager.Factory.create();
-        //requests fblogin with public profile and friends of the user
+        //requests fblogin with public profile and user friends permissions
         LoginManager.getInstance().registerCallback(callbackManager,this);
-        LoginManager.getInstance().logInWithReadPermissions(fragment, Arrays.asList("public_profile","user_friends"));
+        LoginManager.getInstance().logInWithReadPermissions(activity, Arrays.asList("public_profile","user_friends"));
+
     }
 
     @Override
     public void onSuccess(LoginResult loginResult) {
-        // get access token
-        Log.i("Token",loginResult.getAccessToken().getUserId());
-        this.loginResult = loginResult;
-        // request aoi login
-       // loginFacebookUser();
+        // request fb login
+        loginFacebookUser(loginResult.getAccessToken());
 
         //Handles the result of login and changes the JSON Object to User Object with equivalent values.
         GraphRequest.newMeRequest(
@@ -103,24 +129,24 @@ public class LoginProvider implements FacebookCallback<LoginResult>,
                     public void onCompleted(JSONObject json, GraphResponse response) {
                         if (response.getError() != null) {
                             // handle error
-                            System.out.println("ERROR");
+                            Log.i(Configuration.TAG,"Fb Login Error ERROR");
                         } else {
-
+                            Log.i(Configuration.TAG,json.toString());
                             User user;
                             try {
-                                //String email = json.getString("email");
-                                //String id = json.getString("id");
-                                String firstname = json.getString("first_name");
-                                String lastname = json.getString("last_name");
-                                String name = firstname+" "+lastname;
+                                String name = null;
+                                String id = json.getString("id");
+                                if (!json.isNull("name") ) name = json.getString("name");
                                 user = new User(name, "", "");
+                                user.setId(id);
+                                user.setProvider(Provider.Fb_LOGIN);
+                                Log.i(Configuration.TAG, "fb login success");
+                                SessionManager.getInstance().storeSession(user);
                                 loginListener.onLoginSuccess(user);
-                                Log.i("Success"," n: "+name);
                             } catch (JSONException e) {
-                                e.printStackTrace();
+                                Log.i(Configuration.TAG, " n: " + e.toString());
                                 user = new User("", "", "");
                             }
-
                         }
                     }
 
@@ -141,9 +167,13 @@ public class LoginProvider implements FacebookCallback<LoginResult>,
 
     // GOOGLE //
 
-    public void loginViaGoogle(FragmentActivity fragmentActivity){
+    /**
+     * Triggers the google login process.
+     * @param fragmentActivity
+     */
+    public void loginViaGoogle(FragmentActivity fragmentActivity) {
         // check if not initialized previously
-        if (result == null) {
+        if (mGoogleApiClient == null) {
             // init sign in objects
             GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestEmail()
@@ -152,27 +182,12 @@ public class LoginProvider implements FacebookCallback<LoginResult>,
                     .enableAutoManage(fragmentActivity /* FragmentActivity */, this /* OnConnectionFailedListener */)
                     .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                     .build();
+            Log.i(Configuration.TAG,"result null");
         }
-        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
-        if (opr.isDone()) {
-            // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
-            // and the GoogleSignInResult will be available instantly.
-             result = opr.get();
-            Log.i("googleLog",result.getSignInAccount().getEmail());
-        } else {
-            // If the user has not previously signed in on this device or the sign-in has expired,
-            // this asynchronous branch will attempt to sign in the user silently.  Cross-device
-            // single sign-on will occur in this branch.
-            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
-                @Override
-                public void onResult(GoogleSignInResult googleSignInResult) {
-                   Log.i("googleLog",googleSignInResult.getSignInAccount().getEmail());
-                }
-            });
-        }
-        // request signin
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+
         fragmentActivity.startActivityForResult(signInIntent, RC_GOOGLE_LOGIN);
+
     }
 
     @Override
@@ -180,17 +195,53 @@ public class LoginProvider implements FacebookCallback<LoginResult>,
         loginListener.onLoginFailed("Connection Error");
     }
 
+    /**
+     * Method to login user via email, sends request to SessionManager to store session.
+     * @param emailInput is the email of the user.
+     * @param passwordInput is the password of the user.
+     */
     public void loginViaEmail(String emailInput, String passwordInput) {
         User user = new User(emailInput, passwordInput);
+        user.setId((int)Math.random()*100 + "");
+        user.setProvider(EMAIL_LOGIN);
         SessionManager.getInstance().storeSession(user);
-
-    }
-    public void logOut(){
-        SessionManager.getInstance().clearSession();
     }
 
-    public void register(String name, String email, String password) {
+    /**
+     * Method to logout current user
+     */
+    public void logOut() {
+        User user = SessionManager.getInstance().getSessionUser();
+        Log.i(Configuration.TAG, "provider" + user.getProvider());
+        if (user.getProvider() != null) {
+            switch (user.getProvider()) {
+                case EMAIL_LOGIN:
+                    SessionManager.getInstance().clearSession();
+                    loginListener.onLogOutSuccess();
+                    break;
+                case Fb_LOGIN:
+                    LoginManager.getInstance().logOut();
+                    SessionManager.getInstance().clearSession();
+                    loginListener.onLogOutSuccess();
+                    break;
+                case GOOGLE_LOGIN:
+                    SessionManager.getInstance().clearSession();
+                    loginListener.onLogOutSuccess();
+            }
+        } else {
+            SessionManager.getInstance().clearSession();
+            loginListener.onLogOutSuccess();
+        }
+    }
 
+    /**
+     * Handles the registration of a user.
+     */
+    public void registerUser(String name, String email, String password) {
+        User user = new User(name, email, password);
+        user.setId((int)Math.random()*100 + "");
+        user.setProvider(EMAIL_LOGIN);
+        SessionManager.getInstance().storeSession(user);
     }
 
     private void loginFacebookUser(AccessToken accessToken) {
@@ -199,11 +250,11 @@ public class LoginProvider implements FacebookCallback<LoginResult>,
 
     // CALLBACK //
 
-    /**
-     * Interface definition for callbacks to be invoked
-     * when events occur in {@link LoginProvider}.
-     */
-    public interface OnLoginProviderListener {
+        /**
+        * Interface definition for callbacks to be invoked
+        * when events occur in {@link LoginProvider}.
+        */
+ public interface OnLoginProviderListener {
         /**
          * Called once Login is successful.
          * @param user
@@ -220,9 +271,9 @@ public class LoginProvider implements FacebookCallback<LoginResult>,
          * Called once login is canceled
          */
         void onLoginCanceled();
+
+        void onLogOutSuccess();
     }
 
     // API //
-
-
 }

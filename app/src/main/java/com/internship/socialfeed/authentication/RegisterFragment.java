@@ -1,4 +1,4 @@
-package com.internship.socialfeed;
+package com.internship.socialfeed.authentication;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.internship.socialfeed.R;
+import com.internship.socialfeed.components.User;
 import com.internship.socialfeed.data.LoginProvider;
 
 
@@ -92,7 +94,7 @@ public class RegisterFragment extends Fragment implements LoginProvider.OnLoginP
     }
     /** Handles the press of the submit button, and if credentials are valid,
      * an instant of the LoginProvider class is created, which is used to call
-     * register method and passing the credentials to it.
+     * registerUser method and passing the credentials to it.
      */
     private void submitForm() {
         if (validateName() && validateEmail() && validatePassword()) {
@@ -100,7 +102,9 @@ public class RegisterFragment extends Fragment implements LoginProvider.OnLoginP
             String email = getInputEmail();
             String password = getInputPassword();
             LoginProvider loginProvider = new LoginProvider(getContext(), RegisterFragment.this);
-            loginProvider.register(name,email,password);
+            loginProvider.registerUser(name,email,password);
+            User user = new User(name, email, password);
+            mListener.onRegisterSubmitSelected(user);
         }
     }
 
@@ -222,12 +226,28 @@ public class RegisterFragment extends Fragment implements LoginProvider.OnLoginP
 
     }
 
+    @Override
+    public void onLogOutSuccess() {
+
+    }
+
 
     public interface OnRegisterFragmentInteractionListener {
-        // TODO: Update argument type and name
+        /**
+         * Indicates register submit button selected.
+         */
         void onRegisterSubmitSelected(User user);
+        /**
+         * Indicates progress taking place.
+         */
         void onShowProgress();
+        /**
+         * Indicates current progress finished.
+         */
         void onDismissProgress();
+        /**
+         * Triggered to change toolbar title.
+         */
         void changeToolbarTitle(String title);
 
     }

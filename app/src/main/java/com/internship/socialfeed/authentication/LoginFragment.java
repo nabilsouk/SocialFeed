@@ -1,4 +1,4 @@
-package com.internship.socialfeed;
+package com.internship.socialfeed.authentication;
 
 import android.support.v4.app.Fragment;
 import android.content.Context;
@@ -6,12 +6,16 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.internship.socialfeed.Configuration.Configuration;
+import com.internship.socialfeed.R;
+import com.internship.socialfeed.components.User;
 import com.internship.socialfeed.data.LoginProvider;
 
 public class LoginFragment extends Fragment implements
@@ -32,6 +36,7 @@ public class LoginFragment extends Fragment implements
         if (container != null) {
             container.removeAllViews();
         }
+        Log.i(Configuration.TAG,"LoginFragment");
         return getActivity().getLayoutInflater().inflate(R.layout.fragment_login,container,false);
     }
 
@@ -126,9 +131,7 @@ public class LoginFragment extends Fragment implements
     }
 
 
-    /** Handles the press of the submit button, and if credentials are valid,
-     * an instant of the LoginProvider class is created, which is used to call
-     * loginViaEmail method and passing the credentials to it.
+    /** Handles submit button press.
      */
     private void submitButtonPressed() {
 
@@ -140,9 +143,12 @@ public class LoginFragment extends Fragment implements
             LoginProvider loginProvider = new LoginProvider(getContext(), this);
             loginProvider.loginViaEmail(getEmailInput(),getPasswordInput());
             // inform parent of execution end
+            User user = new User(getEmailInput(),getPasswordInput());
+            mListener.onLoggedIn(user);
         }
         // no need for else statement, validation will show errors
     }
+
 
     /**
      * Validates the email inserted in the email TextField,
@@ -227,13 +233,37 @@ public class LoginFragment extends Fragment implements
 
     }
 
+    @Override
+    public void onLogOutSuccess() {
+
+    }
+
 
     public interface OnLoginFragmentInteractionListener {
-        // TODO: Update argument type and name
+
+        /**
+         * Indicates user logged in.
+         */
         void onLoggedIn(User user);
+
+        /**
+         * Indicates register button pressed.
+         */
         void onRegisterSelected();
+
+        /**
+         * Indicates progress taking place.
+         */
         void onShowProgress();
+
+        /**
+         * Indicates current progress finished.
+         */
         void onDismissProgress();
+
+        /**
+         * Triggered to change toolbar title.
+         */
         void changeToolbarTitle(String title);
     }
 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/shape_square_white"/>
+    <item android:drawable="@drawable/logo_splash"
+        android:height="200dp"
+        android:width="140dp"
+        android:bottom="10dp"
+        android:top="5dp" />
+</layer-list>

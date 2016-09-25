@@ -1,16 +1,22 @@
-package com.internship.socialfeed;
+package com.internship.socialfeed.authentication;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.internship.socialfeed.Configuration.Configuration;
+import com.internship.socialfeed.R;
+import com.internship.socialfeed.components.User;
 import com.internship.socialfeed.data.LoginProvider;
 
-
+/**
+ * Fragment class which handles the UI of login functionality.
+ */
 public class LoginOptionsFragment extends Fragment implements
         View.OnClickListener,
         LoginProvider.OnLoginProviderListener {
@@ -25,6 +31,8 @@ public class LoginOptionsFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        Log.i(Configuration.TAG,"loginOptions");
         // Inflate the layout for this fragment
         View view= getActivity().getLayoutInflater().inflate(R.layout.fragment_login_options, container, false);
         initializeViews(view);
@@ -38,12 +46,20 @@ public class LoginOptionsFragment extends Fragment implements
         mListener.changeToolbarTitle(getString(R.string.app_name));
     }
 
-    public void loginButtonPressed() {
+    /**
+     * Handles login button click.
+     */
+    public void handleLoginButtonPressed() {
         if (mListener != null) {
             mListener.onLoginSelected();
         }
     }
-    public void RegisterButtonPressed() {
+
+
+    /**
+     * Handles register button click.
+     */
+    public void handleRegisterButtonPressed() {
         if (mListener != null) {
             mListener.onRegisterSelected();
         }
@@ -52,15 +68,27 @@ public class LoginOptionsFragment extends Fragment implements
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (loginProvider != null)  loginProvider.onActivityResult(requestCode, resultCode, data);
+        Log.i(Configuration.TAG,"Login options");
+        if (loginProvider != null) loginProvider.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void FbloginButtonPressed() {
-        loginProvider.loginViaFB(this);
+    /**
+     * Handles fb login button click.
+     */
+    public void handleFbLoginButtonPressed() {
+        mListener.onShowProgress();
+        loginProvider.loginViaFB(getActivity());
     }
-    public void GoogleloginButtonPressed() {
+
+    /**
+     * Handles google login button click.
+     */
+    public void handleGoogleLoginButtonPressed()
+    {
+        mListener.onShowProgress();
         loginProvider.loginViaGoogle(getActivity());
     }
+
     void initializeViews(View view) {
         view.findViewById(R.id.btnFbLogin).setOnClickListener(this);
         view.findViewById(R.id.btnGmailLogin).setOnClickListener(this);
@@ -89,23 +117,24 @@ public class LoginOptionsFragment extends Fragment implements
     public void onClick(View view) {
         switch(view.getId()){
             case R.id.btnFbLogin:
-                FbloginButtonPressed();
+                handleFbLoginButtonPressed();
                 break;
             case R.id.btnGmailLogin:
-                GoogleloginButtonPressed();
+                handleGoogleLoginButtonPressed();
                 break;
             case R.id.btnEmailLogin:
-                loginButtonPressed();
+                handleLoginButtonPressed();
                 break;
             case R.id.btnRegister:
-                RegisterButtonPressed();
+                handleRegisterButtonPressed();
                 break;
         }
     }
 
     @Override
     public void onLoginSuccess(User user) {
-
+        mListener.onDismissProgress();
+        mListener.onSocialAccountLoginSuccess(user);
     }
 
     @Override
@@ -118,13 +147,37 @@ public class LoginOptionsFragment extends Fragment implements
 
     }
 
+    @Override
+    public void onLogOutSuccess() {
+
+    }
+
     public interface OnOptionsFragmentInteractionListener {
-        // TODO: Update argument type and name
+        /**
+         * Indicates login option selected.
+         */
         void onLoginSelected();
+        /**
+         * Indicates register option selected.
+         */
         void onRegisterSelected();
-        void onLoggedIn();
+        /**
+         * Indicates progress taking place.
+         */
         void onShowProgress();
+        /**
+         * Indicates current progress finished.
+         */
         void onDismissProgress();
+
+        /**
+         * Triggered to change toolbar title.
+         */
         void changeToolbarTitle(String title);
+
+        /**
+         * Indicates social account login succeeded.
+         */
+        void onSocialAccountLoginSuccess(User user);
     }
 }

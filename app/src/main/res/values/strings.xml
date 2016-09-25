@@ -1,5 +1,16 @@
 <resources>
     <string name="app_name">SocialFeed</string>
+    <string name="body">  That hard work is a key to success is a well-known adage. Parents, teachers as well as others guide a child to work hard so that he can achieve good scores. Though a little bit of luck plays a positive role but I believe that hard work is the key to success. In fact if only luck is to be considered, no one would work but just wait till their luck shines up. But this is not the case. Today we see that technology has improved to such an extent that a person can have a lunch in Paris and a dinner in New York on the same day. There lies great contributions from people like the Wright brothels and Henry Ford to invent these means of transportation, which were the result of their hard-work arid great efforts. If these people had waited for the D-day probably we could still have been using fire and wood to cook instead of using electrical ovens, and the globalization would not have taken effect. A person can excel in his career due to hard work. If he sits at home, no one would offer him a job unless he initiates the job searching process. Also if you are working in a company you will be promoted only because of working hard; luck does not lie in the picture. A student stands out first only if he studies hard. Many students after the graduation say that probably they were not lucky enough to get good marks, or the evaluators must have marked their papers strictly. But again these are meroly reasons that can\'t be given preference. Today science has developed so much that hand shaking can be virtually done between any two countries.This is due to the tremendous amount of researches accomplished by scientists. All achievements in science and technology am because of hard work contributed by people in different fields. Thus a young individual has the potential to do something and crave in reaching a particular acme. Whether your luck prevails or not condition being hard work and efforts, which will pick you up wherever you are.</string>
+
+    <string name="notification">Notification</string>
+    <string name="logout">Logout</string>
+    <string name="aboutUs">About Us</string>
+
+    <string-array name="settings">
+        <item>@string/notification</item>
+        <item>@string/logout</item>
+        <item>@string/aboutUs</item>
+    </string-array>
 
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
