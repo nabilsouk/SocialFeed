@@ -50,7 +50,7 @@ public class SplashActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.i(Configuration.TAG,"SplashActivity"+resultCode);
-        //if
+
         if (resultCode == RESULT_CANCELED){
             Log.i(Configuration.TAG,"finish");
             finish();
@@ -66,5 +66,4 @@ public class SplashActivity extends AppCompatActivity {
             startActivityForResult(intent, Configuration.AUTHENTICATION_REQUEST);
         }
     }
-
 }
