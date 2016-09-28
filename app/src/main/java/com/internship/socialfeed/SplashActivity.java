@@ -22,10 +22,11 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
         delay(1000);
     }
-        /**
-         * Delays the execution of the program
-         * @param delay is the dime of delay in milliseconds
-         * */
+    
+    /**
+     * Delays the execution of the program
+     * @param delay is the dime of delay in milliseconds
+     * */
     private void delay(int delay) {
         Runnable r = new Runnable() {
             @Override
